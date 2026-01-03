@@ -16,23 +16,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) (Optionnel) Build ou préparation du projet C
-      # - name: Build project
-      #   run: |
-      #     make
-
-      # 3) Générer un SBOM CycloneDX avec Trivy en mode "fs"
+      # 3) Générer un SBOM CycloneDX avec Trivy
       - name: Generate SBOM with Trivy (CycloneDX)
         uses: aquasecurity/trivy-action@0.33.1
         with:
+          command: 'sbom'
           scan-type: 'fs'
           scan-ref: '.'
-          format: 'cyclonedx'
+          format: 'cyclonedx-json'
           output: 'sbom-trivy-cyclonedx.json'
 
       # 4) Uploader le SBOM en artifact
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-cyclonedx
-          path: sbom-cyclonedx.json
+          name: sbom-trivy-cyclonedx
+          path: sbom-trivy-cyclonedx.json
