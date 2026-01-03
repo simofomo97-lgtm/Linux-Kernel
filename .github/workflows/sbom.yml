@@ -1,4 +1,4 @@
-name: Generate SBOM (C + CycloneDX)
+name: Trivy SBOM (CycloneDX)
 
 on:
   push:
@@ -6,19 +6,33 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  sbom:
+  trivy-sbom:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       # 1) Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Générer un SBOM CycloneDX avec Syft via Anchore SBOM Action
-      - name: Generate CycloneDX SBOM
-        uses: anchore/sbom-action@v0
+      # 2) (Optionnel) Build ou préparation du projet C
+      # - name: Build project
+      #   run: |
+      #     make
+
+      # 3) Générer un SBOM CycloneDX avec Trivy en mode "fs"
+      - name: Generate SBOM with Trivy (CycloneDX)
+        uses: aquasecurity/trivy-action@0.33.1
         with:
-          path: .
-          format: cyclonedx-json
-          output-file: sbom-cyclonedx.json
-          artifact-name: sbom-cyclonedx
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'cyclonedx'
+          output: 'sbom-trivy-cyclonedx.json'
+
+      # 4) Uploader le SBOM en artifact
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom-cyclonedx.json
