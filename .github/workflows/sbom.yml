@@ -8,23 +8,28 @@ on:
 jobs:
   trivy-sbom:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       # 1) Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 3) Générer un SBOM CycloneDX avec Trivy
+      # 2) Installer Trivy (depuis le script officiel)
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.tar.gz
+          tar zxvf trivy_Linux-64bit.tar.gz
+          sudo mv trivy /usr/local/bin/
+
+      # 3) Générer le SBOM CycloneDX pour le repo
       - name: Generate SBOM with Trivy (CycloneDX)
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          command: 'sbom'
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'cyclonedx-json'
-          output: 'sbom-trivy-cyclonedx.json'
+        run: |
+          trivy sbom \
+            --format cyclonedx-json \
+            --output sbom-trivy-cyclonedx.json \
+            .
 
       # 4) Uploader le SBOM en artifact
       - name: Upload SBOM artifact
