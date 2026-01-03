@@ -1,0 +1,30 @@
+name: Generate SBOM (C + CycloneDX)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Récupérer le code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      # 3) Générer un SBOM CycloneDX avec Syft via Anchore SBOM Action
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          artifact-name: sbom-cyclonedx.json
+
+      # 4) Publier le SBOM en artifact
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-kernel-sbom
+          path: linux-kernel-sbom.json
