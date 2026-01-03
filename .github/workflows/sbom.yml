@@ -1,4 +1,4 @@
-name: Trivy SBOM (CycloneDX)
+name: Generate SBOM (C + CycloneDX)
 
 on:
   push:
@@ -6,29 +6,17 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  trivy-sbom:
+  sbom:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Trivy
-        run: |
-          TRIVY_VERSION=v0.68.2
-          wget https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz
-          tar zxvf trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz
-          sudo mv trivy /usr/local/bin/
-
-      - name: Generate SBOM with Trivy (CycloneDX)
-        run: |
-          trivy sbom \
-            --format cyclonedx \
-            --output sbom-trivy-cyclonedx.json \
-            .
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
         with:
-          name: sbom-trivy-cyclonedx
-          path: sbom-trivy-cyclonedx.json
+          path: .
+          format: cyclonedx-json
+          output-file: sbom-cyclonedx.json
+          artifact-name: sbom-cyclonedx
