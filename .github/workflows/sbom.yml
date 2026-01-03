@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Installer une version précise de Trivy
       - name: Install Trivy
         run: |
           TRIVY_VERSION=v0.68.2
@@ -22,15 +20,13 @@ jobs:
           tar zxvf trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz
           sudo mv trivy /usr/local/bin/
 
-      # 3) Générer le SBOM CycloneDX pour le repo
       - name: Generate SBOM with Trivy (CycloneDX)
         run: |
           trivy sbom \
-            --format cyclonedx-json \
+            --format cyclonedx \
             --output sbom-trivy-cyclonedx.json \
             .
 
-      # 4) Uploader le SBOM en artifact
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
