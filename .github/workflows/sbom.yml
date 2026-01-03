@@ -10,12 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1) Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2) Générer un SBOM CycloneDX avec Syft via Anchore SBOM Action
       - name: Generate CycloneDX SBOM
         uses: anchore/sbom-action@v0
         with:
           path: .
           format: cyclonedx-json
-          sbom-artifact: sbom-cyclonedx
+          output-file: sbom-cyclonedx.json
+          artifact-name: sbom-cyclonedx
